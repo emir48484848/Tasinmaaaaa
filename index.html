@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Taşınma Progress</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b0b0b;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px #00ff88;
+}
+
+.bar-container {
+  width: 80%;
+  max-width: 700px;
+  background: #222;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,255,136,0.3);
+}
+
+.bar {
+  height: 50px;
+  width: 65%;
+  background: linear-gradient(90deg, #ff4d4d, #ffcc00, #00ff88);
+  transition: width 0.6s ease-in-out;
+  box-shadow: 0 0 15px #00ff88;
+}
+
+.text {
+  margin-top: 20px;
+  font-size: 26px;
+  text-shadow: 0 0 10px #00ff88;
+  line-height: 1.6;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 5px #00ff88; }
+  to { text-shadow: 0 0 20px #00ff88, 0 0 30px #00ff88; }
+}
+
+.footer {
+  margin-top: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #00ff88;
+  text-shadow: 0 0 15px #00ff88;
+  animation: flicker 2s infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* 🚚 KOLİ + YOL */
+.truck-container {
+  width: 80%;
+  max-width: 700px;
+  height: 80px;
+  position: relative;
+  margin-top: 25px;
+}
+
+/* 🛣️ yol çizgisi */
+.road {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    #444,
+    #444 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  opacity: 0.6;
+}
+
+.boxes {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 22px;
+  transition: 0.5s ease-in-out;
+  text-shadow: 0 0 10px #00ff88;
+}
+
+.truck {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 32px;
+  text-shadow: 0 0 15px #00ff88;
+}
+
+/* 🚚 shake */
+.shake {
+  animation: shake 0.2s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translate(0px, 0px); }
+  25% { transform: translate(1px, -1px); }
+  50% { transform: translate(-1px, 1px); }
+  75% { transform: translate(1px, 1px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* 💥 full */
+.full {
+  color: #00ff88;
+  text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚚 TAŞINMA PROGRESS</h1>
+
+<div class="bar-container">
+  <div class="bar" id="fill"></div>
+</div>
+
+<div class="truck-container">
+  <div class="boxes" id="boxes">📦📦📦📦📦📦📦📦📦📦</div>
+
+  <div class="road"></div>
+
+  <div class="truck" id="truck">🚚</div>
+</div>
+
+<div class="text" id="text"></div>
+
+<div class="footer" id="footer">KOLAY GELSİNN VUHHUUU 🎉</div>
+
+<script>
+const startPercent = 65;
+const endPercent = 100;
+
+const startDate = new Date("2026-06-29T00:00:00");
+const endDate = new Date("2026-07-02T10:00:00");
+
+function update() {
+    const now = new Date();
+
+    const total = endDate - startDate;
+    const passed = now - startDate;
+
+    let percent = startPercent + (passed / total) * (endPercent - startPercent);
+
+    if (percent < startPercent) percent = startPercent;
+    if (percent > endPercent) percent = endPercent;
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    let daysLeft = Math.ceil((endDate - now) / msPerDay);
+    if (daysLeft < 0) daysLeft = 0;
+
+    document.getElementById("fill").style.width = percent + "%";
+
+    document.getElementById("text").innerHTML =
+        percent.toFixed(1) + "%<br>" + daysLeft + " gün kaldı";
+
+    // 📦 hareket (sola düzgün hizalı artık)
+    const boxes = document.getElementById("boxes");
+    boxes.style.transform = `translateX(${percent * 2.2}px)`;
+
+    // 📦 azalma hissi
+    const boxCount = Math.max(0, Math.floor((100 - percent) / 5));
+    boxes.innerHTML = "📦".repeat(boxCount);
+
+    // 🚚 shake
+    const truck = document.getElementById("truck");
+    if (percent > 80 && percent < 100) {
+        truck.classList.add("shake");
+    } else {
+        truck.classList.remove("shake");
+    }
+
+    // 💥 full
+    const footer = document.getElementById("footer");
+    if (percent >= 100) {
+        footer.innerHTML = "🚚 FULL LOADED! 🎉";
+        footer.classList.add("full");
+        truck.classList.remove("shake");
+    }
+}
+
+update();
+setInterval(update, 1000 * 20);
+</script>
+
+</body>
+</html>
